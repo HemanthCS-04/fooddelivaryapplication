@@ -306,7 +306,7 @@
           sessionStorage.removeItem('hb_checkout_summary');
           updateNavCartBadge();
           setTimeout(() => {
-            window.location.href = `/order-details.html?id=${res.data.id}`;
+            window.location.href = `order-details.html?id=${res.data.id}`;
           }, 800);
         }
       } catch (err) {

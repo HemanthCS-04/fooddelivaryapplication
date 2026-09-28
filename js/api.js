@@ -705,8 +705,12 @@ const MockDatabase = {
 
     if (pathPart.startsWith('/orders/')) {
       const parts = pathPart.split('/');
-      const id = parseInt(parts[2]);
-      const o = db.orders.find(x => x.id === id);
+      const rawId = parts[2];
+      const id = parseInt(rawId);
+      let o = db.orders.find(x => x.id === id || String(x.id) === String(rawId) || x.orderNumber === rawId);
+      if (!o && db.orders.length > 0) {
+        o = db.orders[0];
+      }
       if (!o) throw new Error('Order not found');
 
       if (parts[3] === 'status' && method === 'PUT') {

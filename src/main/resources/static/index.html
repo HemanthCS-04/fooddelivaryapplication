@@ -333,7 +333,7 @@
       const executeSearch = () => {
         const query = searchInput.value.trim();
         if (query) {
-          window.location.href = `/restaurants.html?search=${encodeURIComponent(query)}`;
+          window.location.href = `restaurants.html?search=${encodeURIComponent(query)}`;
         }
       };
       searchBtn.addEventListener('click', executeSearch);
