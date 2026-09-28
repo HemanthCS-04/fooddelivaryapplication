@@ -762,13 +762,14 @@ app.delete('/api/users/:id/addresses/:addrId', (req, res) => {
   return res.json({ success: true, message: 'Address deleted' });
 });
 
-// Serve static frontend files from src/main/resources/static/
+// Serve static frontend files
 const staticDir = path.join(__dirname, 'src/main/resources/static');
 app.use(express.static(staticDir));
+app.use(express.static(__dirname));
 
 // Fallback for root
 app.get('/', (_req, res) => {
-  res.sendFile(path.join(staticDir, 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start Express server
