@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found - HungerByte</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Auto-fix redirect if user landed on a URL missing the repository name
+    (function() {
+      const path = window.location.pathname;
+      const search = window.location.search;
+      if (!path.includes('/fooddelivaryapplication/') && path.endsWith('.html')) {
+        const file = path.split('/').pop();
+        window.location.replace('/fooddelivaryapplication/' + file + search);
+      }
+    })();
+  </script>
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+  <div class="text-center p-4" style="max-width: 500px;">
+    <div style="font-size: 4rem;">🍔</div>
+    <h1 class="fw-bold mt-2 text-dark">Page Not Found</h1>
+    <p class="text-muted mt-2">Oops! The page you are looking for might have been moved, or you may be at the wrong path.</p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+      <a href="index.html" class="btn btn-hb-primary px-4 py-2">Go to Home</a>
+      <a href="orders.html" class="btn btn-outline-dark px-4 py-2">My Orders</a>
+    </div>
+  </div>
+</body>
+</html>

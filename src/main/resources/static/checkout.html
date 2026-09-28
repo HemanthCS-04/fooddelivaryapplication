@@ -305,9 +305,15 @@
           showToast('Order placed successfully! Redirecting...', 'success');
           sessionStorage.removeItem('hb_checkout_summary');
           updateNavCartBadge();
+
+          const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+          const targetUrl = `${window.location.origin}${basePath}order-details.html?id=${res.data.id}`;
+
+          btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Order Placed! Redirecting...`;
+
           setTimeout(() => {
-            window.location.href = `order-details.html?id=${res.data.id}`;
-          }, 800);
+            window.location.replace(targetUrl);
+          }, 600);
         }
       } catch (err) {
         showToast(err.message, 'error');
