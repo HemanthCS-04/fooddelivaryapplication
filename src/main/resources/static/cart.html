@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - HungerByte</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-hb sticky-top">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-logo" href="/index.html">
+        <span class="fs-3">🍔</span>
+        <span>Hunger<span class="brand-accent">Byte</span></span>
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <a href="/restaurants.html" class="btn btn-outline-secondary btn-sm">&larr; Back to Restaurants</a>
+        <div id="navbar-auth-section"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Your Food Cart 🛒</h2>
+      <button class="btn btn-outline-danger btn-sm" id="clearCartBtn">Clear Cart</button>
+    </div>
+
+    <div class="row g-4" id="cartContentWrapper">
+      <!-- Items column -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <div id="cartItemsList" class="d-flex flex-column gap-3">
+            <div class="text-center py-5">
+              <div class="spinner-border text-danger" role="status"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bill Details column -->
+      <div class="col-lg-4">
+        <!-- Coupon Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-3">
+          <label class="form-label fw-bold small text-uppercase text-secondary mb-2">Apply Promo Coupon</label>
+          <div class="input-group mb-2">
+            <input type="text" id="couponInput" class="form-control text-uppercase font-monospace" placeholder="HUNGER50">
+            <button class="btn btn-dark" type="button" id="applyCouponBtn">Apply</button>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-light text-dark border pointer" onclick="setCoupon('HUNGER50')">HUNGER50</span>
+            <span class="badge bg-light text-dark border pointer" onclick="setCoupon('FEAST100')">FEAST100</span>
+            <span class="badge bg-light text-dark border pointer" onclick="setCoupon('WELCOME20')">WELCOME20</span>
+          </div>
+          <div id="couponStatusText" class="small mt-2" style="display: none;"></div>
+        </div>
+
+        <!-- Price Summary Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 90px;">
+          <h5 class="fw-bold mb-3">Bill Details</h5>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Item Subtotal</span>
+            <span class="fw-semibold text-dark" id="billSubtotal">₹0</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Delivery Fee</span>
+            <span class="fw-semibold text-dark" id="billDelivery">₹40</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">GST & Restaurant Charges (5%)</span>
+            <span class="fw-semibold text-dark" id="billTax">₹0</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small text-success" id="discountRow" style="display: none;">
+            <span>Coupon Discount</span>
+            <span class="fw-bold" id="billDiscount">-₹0</span>
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between mb-4 align-items-center">
+            <div>
+              <span class="fw-bold fs-5 text-dark">To Pay</span>
+              <div class="small text-muted">Inclusive of all taxes</div>
+            </div>
+            <span class="fw-bold fs-4 text-hb-primary" id="billGrandTotal">₹0</span>
+          </div>
+
+          <button class="btn btn-hb-primary btn-lg w-100 fw-bold shadow-sm" id="checkoutBtn">
+            Proceed to Checkout &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    let currentCart = null;
+    let appliedCoupon = null;
+    let activeRestaurantId = null;
+
+    function setCoupon(code) {
+      document.getElementById('couponInput').value = code;
+      applyCoupon();
+    }
+
+    async function loadCart() {
+      try {
+        const userId = AuthManager.getUserId();
+        const res = await apiRequest(`/cart?userId=${userId}`);
+        currentCart = res.data;
+        renderCart();
+      } catch (e) {
+        document.getElementById('cartItemsList').innerHTML = `
+          <div class="text-center py-5 text-muted">
+            <div class="fs-1 mb-2">🛒</div>
+            <h5>Your cart is empty</h5>
+            <a href="/restaurants.html" class="btn btn-hb-primary mt-3">Browse Restaurants</a>
+          </div>
+        `;
+      }
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItemsList');
+      if (!currentCart || !currentCart.items || currentCart.items.length === 0) {
+        document.getElementById('cartContentWrapper').innerHTML = `
+          <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm p-5">
+            <div class="fs-1 mb-3">🛒</div>
+            <h3 class="fw-bold mb-2">Your cart is currently empty</h3>
+            <p class="text-muted mb-4">Good food is always just a few clicks away! Explore top kitchens nearby.</p>
+            <a href="/restaurants.html" class="btn btn-hb-primary btn-lg px-4 fw-bold">Explore Menu</a>
+          </div>
+        `;
+        updateNavCartBadge();
+        return;
+      }
+
+      // Pick restaurant from first item
+      if (currentCart.items[0] && currentCart.items[0].foodItem && currentCart.items[0].foodItem.restaurant) {
+        activeRestaurantId = currentCart.items[0].foodItem.restaurant.id;
+      }
+
+      container.innerHTML = currentCart.items.map(item => `
+        <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
+          <div class="d-flex align-items-center gap-3">
+            <img src="${item.foodItem.imageUrl}" alt="${item.foodItem.name}" class="rounded-3" style="width: 70px; height: 70px; object-fit: cover;" onerror="handleImageError(this)">
+            <div>
+              <h6 class="fw-bold mb-1">${item.foodItem.name}</h6>
+              ${item.variant ? `<span class="badge bg-light text-dark border small me-2">${item.variant.name}</span>` : ''}
+              <div class="price-inr small text-dark">${formatINR(item.price)} each</div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <div class="input-group input-group-sm" style="width: 105px;">
+              <button class="btn btn-outline-secondary" onclick="updateQty(${item.id}, ${item.quantity - 1})">-</button>
+              <span class="input-group-text bg-white fw-bold px-3">${item.quantity}</span>
+              <button class="btn btn-outline-secondary" onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
+            </div>
+
+            <div class="fw-bold fs-6" style="min-width: 80px; text-align: right;">
+              ${formatINR(item.price * item.quantity)}
+            </div>
+
+            <button class="btn btn-link text-danger p-0 ms-2" title="Remove Item" onclick="removeItem(${item.id})">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      recalculateBill();
+      updateNavCartBadge();
+    }
+
+    function recalculateBill() {
+      if (!currentCart || !currentCart.items) return;
+
+      const subtotal = currentCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const deliveryFee = 40.0;
+      const tax = Math.round((subtotal * 0.05) * 100) / 100; // 5% GST
+
+      let discount = 0;
+      if (appliedCoupon) {
+        if (appliedCoupon.discountType === 'PERCENTAGE') {
+          discount = (subtotal * appliedCoupon.discountValue) / 100;
+          if (appliedCoupon.maxDiscountAmount && discount > appliedCoupon.maxDiscountAmount) {
+            discount = appliedCoupon.maxDiscountAmount;
+          }
+        } else {
+          discount = appliedCoupon.discountValue;
+        }
+        discount = Math.min(discount, subtotal);
+      }
+
+      const grandTotal = Math.max(0, Math.round((subtotal + deliveryFee + tax - discount) * 100) / 100);
+
+      document.getElementById('billSubtotal').textContent = formatINR(subtotal);
+      document.getElementById('billDelivery').textContent = formatINR(deliveryFee);
+      document.getElementById('billTax').textContent = formatINR(tax);
+
+      const discountRow = document.getElementById('discountRow');
+      if (discount > 0) {
+        discountRow.style.display = 'flex';
+        document.getElementById('billDiscount').textContent = `-${formatINR(discount)}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+
+      document.getElementById('billGrandTotal').textContent = formatINR(grandTotal);
+
+      // Save calculated bill state for checkout
+      sessionStorage.setItem('hb_checkout_summary', JSON.stringify({
+        subtotal,
+        deliveryFee,
+        tax,
+        discount,
+        grandTotal,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+        restaurantId: activeRestaurantId
+      }));
+    }
+
+    async function updateQty(itemId, newQty) {
+      try {
+        const userId = AuthManager.getUserId();
+        const res = await apiRequest(`/cart/items/${itemId}?userId=${userId}&quantity=${newQty}`, { method: 'PUT' });
+        currentCart = res.data;
+        renderCart();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function removeItem(itemId) {
+      try {
+        const userId = AuthManager.getUserId();
+        const res = await apiRequest(`/cart/items/${itemId}?userId=${userId}`, { method: 'DELETE' });
+        currentCart = res.data;
+        showToast('Item removed from cart', 'info');
+        renderCart();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function clearAllCart() {
+      try {
+        const userId = AuthManager.getUserId();
+        await apiRequest(`/cart/clear?userId=${userId}`, { method: 'DELETE' });
+        currentCart = { items: [] };
+        showToast('Cart cleared', 'info');
+        renderCart();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function applyCoupon() {
+      const code = document.getElementById('couponInput').value.trim();
+      const statusText = document.getElementById('couponStatusText');
+      if (!code) {
+        statusText.style.display = 'block';
+        statusText.className = 'small text-danger mt-2';
+        statusText.textContent = 'Please enter a coupon code';
+        return;
+      }
+
+      const subtotal = currentCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      try {
+        const res = await apiRequest(`/coupons/validate/${code}?amount=${subtotal}`);
+        if (res.success && res.data) {
+          appliedCoupon = res.data;
+          statusText.style.display = 'block';
+          statusText.className = 'small text-success mt-2 fw-semibold';
+          statusText.textContent = `✓ Coupon ${code} applied successfully!`;
+          recalculateBill();
+        }
+      } catch (err) {
+        appliedCoupon = null;
+        statusText.style.display = 'block';
+        statusText.className = 'small text-danger mt-2';
+        statusText.textContent = err.message || 'Invalid or inapplicable coupon';
+        recalculateBill();
+      }
+    }
+
+    document.getElementById('applyCouponBtn').addEventListener('click', applyCoupon);
+    document.getElementById('clearCartBtn').addEventListener('click', clearAllCart);
+
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
+      window.location.href = '/checkout.html';
+    });
+
+    document.addEventListener('DOMContentLoaded', loadCart);
+  </script>
+</body>
+</html>

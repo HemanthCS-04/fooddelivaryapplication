@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details & Live Tracker - HungerByte</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-hb sticky-top">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-logo" href="/index.html">
+        <span class="fs-3">🍔</span>
+        <span>Hunger<span class="brand-accent">Byte</span></span>
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        <a href="/orders.html" class="btn btn-outline-secondary btn-sm">&larr; All Orders</a>
+        <div id="navbar-auth-section"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5" id="orderMainContent">
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+          <span class="badge bg-light text-muted border mb-1" id="orderNumberBadge">Order #HB...</span>
+          <h2 class="fw-bold mb-0" id="restaurantNameHeading">Restaurant Name</h2>
+          <p class="text-muted small mb-0" id="orderTimestamp">Placed on ...</p>
+        </div>
+        <div class="text-md-end">
+          <span class="badge px-3 py-2 text-uppercase fs-6" id="orderStatusBadge">STATUS</span>
+          <div class="fw-bold fs-4 text-hb-primary mt-1" id="orderTotalAmount">₹0</div>
+        </div>
+      </div>
+
+      <!-- VISUAL ORDER TIMELINE (Prompt Requirement #11) -->
+      <div class="order-timeline-wrapper my-4 py-2">
+        <h6 class="fw-bold text-uppercase small text-secondary mb-3">Live Order Tracking</h6>
+        <div class="order-timeline position-relative">
+          <div class="order-timeline-progress" id="timelineProgressBar" style="width: 0%;"></div>
+
+          <div class="timeline-step" id="step_PLACED">
+            <div class="step-icon-circle">📝</div>
+            <div class="step-label">Placed</div>
+          </div>
+
+          <div class="timeline-step" id="step_CONFIRMED">
+            <div class="step-icon-circle">✓</div>
+            <div class="step-label">Confirmed</div>
+          </div>
+
+          <div class="timeline-step" id="step_PREPARING">
+            <div class="step-icon-circle">🍳</div>
+            <div class="step-label">Preparing</div>
+          </div>
+
+          <div class="timeline-step" id="step_READY_FOR_PICKUP">
+            <div class="step-icon-circle">📦</div>
+            <div class="step-label">Ready</div>
+          </div>
+
+          <div class="timeline-step" id="step_OUT_FOR_DELIVERY">
+            <div class="step-icon-circle">🛵</div>
+            <div class="step-label">On The Way</div>
+          </div>
+
+          <div class="timeline-step" id="step_DELIVERED">
+            <div class="step-icon-circle">🎉</div>
+            <div class="step-label">Delivered</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulation control for demonstration -->
+      <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="small text-muted fw-semibold">🧪 Demo Simulation: Advance order state to test workflow</span>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-dark" onclick="simulateNextStatus()">Advance to Next Stage &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Order Items -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <h5 class="fw-bold mb-3">Items in this Order</h5>
+          <div class="d-flex flex-column gap-3" id="orderItemsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment & Delivery Details -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <h5 class="fw-bold mb-3">Delivery Information</h5>
+          <div class="d-flex gap-2 align-items-start text-secondary mb-2">
+            <span class="fs-5">📍</span>
+            <div>
+              <div class="fw-bold text-dark">Delivery Address</div>
+              <p class="small mb-0" id="deliveryAddressText">...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <h5 class="fw-bold mb-3">Payment Details</h5>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Payment Method</span>
+            <span class="fw-bold" id="paymentMethodText">UPI</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Payment Status</span>
+            <span class="badge bg-success" id="paymentStatusBadge">COMPLETED</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Transaction ID</span>
+            <span class="font-monospace small text-dark" id="transactionIdText">TXN-000000</span>
+          </div>
+
+          <hr class="my-2">
+
+          <div class="d-flex justify-content-between mb-1 small">
+            <span class="text-muted">Subtotal</span>
+            <span id="subtotalText">₹0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-1 small">
+            <span class="text-muted">Delivery Fee</span>
+            <span>₹40</span>
+          </div>
+          <div class="d-flex justify-content-between mb-1 small">
+            <span class="text-muted">GST (5%)</span>
+            <span id="taxText">₹0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2 small text-success" id="discountSummaryRow" style="display: none;">
+            <span>Discount Applied</span>
+            <span id="discountText">-₹0</span>
+          </div>
+          <div class="d-flex justify-content-between pt-2 border-top fw-bold text-dark">
+            <span>Total Paid</span>
+            <span class="text-hb-primary fs-5" id="finalTotalText">₹0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    let currentOrder = null;
+    const stages = [
+      'PLACED',
+      'CONFIRMED',
+      'PREPARING',
+      'READY_FOR_PICKUP',
+      'OUT_FOR_DELIVERY',
+      'DELIVERED'
+    ];
+
+    async function loadOrder() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id') || 1;
+
+      try {
+        const res = await apiRequest(`/orders/${orderId}`);
+        currentOrder = res.data;
+
+        document.getElementById('orderNumberBadge').textContent = `Order #${currentOrder.orderNumber}`;
+        document.getElementById('restaurantNameHeading').textContent = currentOrder.restaurant ? currentOrder.restaurant.name : 'HungerByte Partner';
+        document.getElementById('orderTimestamp').textContent = `Placed on ${new Date(currentOrder.createdAt).toLocaleString('en-IN')}`;
+        document.getElementById('orderTotalAmount').textContent = formatINR(currentOrder.totalAmount);
+        document.getElementById('deliveryAddressText').textContent = currentOrder.deliveryAddress;
+
+        // Payment info
+        if (currentOrder.payment) {
+          document.getElementById('paymentMethodText').textContent = currentOrder.payment.paymentMethod.replace(/_/g, ' ');
+          document.getElementById('paymentStatusBadge').textContent = currentOrder.payment.paymentStatus;
+          document.getElementById('transactionIdText').textContent = currentOrder.payment.transactionId;
+        }
+
+        // Bill calculation
+        document.getElementById('subtotalText').textContent = formatINR(currentOrder.subtotal);
+        document.getElementById('taxText').textContent = formatINR(currentOrder.tax);
+        if (currentOrder.discount && currentOrder.discount > 0) {
+          document.getElementById('discountSummaryRow').style.display = 'flex';
+          document.getElementById('discountText').textContent = `-${formatINR(currentOrder.discount)}`;
+        }
+        document.getElementById('finalTotalText').textContent = formatINR(currentOrder.totalAmount);
+
+        // Render items
+        const itemsCont = document.getElementById('orderItemsContainer');
+        itemsCont.innerHTML = (currentOrder.orderItems || []).map(item => `
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <div>
+              <div class="fw-bold">${item.quantity} × ${item.foodName}</div>
+              ${item.variantName ? `<span class="badge bg-light text-muted border small">${item.variantName}</span>` : ''}
+              <div class="small text-muted">${formatINR(item.price)} each</div>
+            </div>
+            <div class="fw-bold fs-6">${formatINR(item.price * item.quantity)}</div>
+          </div>
+        `).join('');
+
+        updateTimelineUI(currentOrder.orderStatus);
+      } catch (e) {
+        document.getElementById('orderMainContent').innerHTML = `
+          <div class="alert alert-danger">Error loading order: ${e.message}</div>
+        `;
+      }
+    }
+
+    function updateTimelineUI(status) {
+      const badge = document.getElementById('orderStatusBadge');
+      badge.textContent = status.replace(/_/g, ' ');
+
+      const statusIndex = stages.indexOf(status);
+      const progressPercent = statusIndex >= 0 ? (statusIndex / (stages.length - 1)) * 90 : 0;
+      document.getElementById('timelineProgressBar').style.width = `${progressPercent}%`;
+
+      stages.forEach((st, idx) => {
+        const el = document.getElementById(`step_${st}`);
+        if (!el) return;
+        el.className = 'timeline-step';
+
+        if (idx < statusIndex) {
+          el.classList.add('completed');
+        } else if (idx === statusIndex) {
+          el.classList.add('active');
+        }
+      });
+    }
+
+    async function simulateNextStatus() {
+      if (!currentOrder) return;
+      const currentIdx = stages.indexOf(currentOrder.orderStatus);
+      if (currentIdx === stages.length - 1) {
+        showToast('Order is already fully delivered!', 'info');
+        return;
+      }
+
+      const nextStatus = stages[currentIdx + 1];
+      try {
+        const res = await apiRequest(`/orders/${currentOrder.id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: nextStatus })
+        });
+        currentOrder = res.data;
+        updateTimelineUI(currentOrder.orderStatus);
+        showToast(`Order status updated to: ${nextStatus.replace(/_/g, ' ')}!`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOrder);
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favorites - HungerByte</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-hb sticky-top">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-logo" href="/index.html">
+        <span class="fs-3">🍔</span>
+        <span>Hunger<span class="brand-accent">Byte</span></span>
+      </a>
+
+      <div class="collapse navbar-collapse" id="hbNavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+          <li class="nav-item"><a class="nav-link" href="/index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/restaurants.html">Restaurants</a></li>
+          <li class="nav-item"><a class="nav-link" href="/orders.html">Orders</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/favorites.html">Favorites</a></li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <a href="/cart.html" class="btn btn-outline-dark position-relative rounded-3 px-3 py-2">
+            🛒 Cart
+            <span class="hb-cart-count cart-badge-count" style="display:none;">0</span>
+          </a>
+          <div id="navbar-auth-section"></div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Your Favorite Cravings ❤️</h2>
+        <p class="text-muted small mb-0">Dishes and dining places you have bookmarked</p>
+      </div>
+      <a href="/restaurants.html" class="btn btn-hb-primary btn-sm fw-semibold">Discover More</a>
+    </div>
+
+    <div class="row g-4" id="favoritesGrid">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-danger" role="status"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    async function loadFavorites() {
+      try {
+        const userId = AuthManager.getUserId();
+        const res = await apiRequest(`/favorites?userId=${userId}`);
+        const list = res.data || [];
+        const grid = document.getElementById('favoritesGrid');
+
+        if (list.length === 0) {
+          grid.innerHTML = `
+            <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm p-5">
+              <div class="fs-1 mb-2">❤️</div>
+              <h4 class="fw-bold">No favorites bookmarked yet</h4>
+              <p class="text-muted small mb-4">Click the heart icon on any restaurant or dish to quickly access it here.</p>
+              <a href="/restaurants.html" class="btn btn-hb-primary">Browse Delicious Food</a>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = list.map(fav => {
+          if (fav.restaurant) {
+            const r = fav.restaurant;
+            return `
+              <div class="col-md-6 col-lg-4">
+                <div class="hb-card">
+                  <div class="img-container">
+                    <img src="${r.imageUrl}" alt="${r.name}" class="hb-card-img-top" onerror="handleImageError(this)">
+                    <div class="badge-overlay-rating">★ ${r.rating}</div>
+                  </div>
+                  <div class="p-3 d-flex flex-column flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                      <h5 class="fw-bold text-dark mb-0 text-truncate">${r.name}</h5>
+                      <button class="btn btn-link text-danger p-0" onclick="removeFav(${fav.id})">❌</button>
+                    </div>
+                    <p class="text-muted small mb-2">${r.cuisine}</p>
+                    <a href="/restaurant-details.html?id=${r.id}" class="btn btn-outline-dark btn-sm w-100 mt-auto fw-semibold">View Menu &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else if (fav.foodItem) {
+            const f = fav.foodItem;
+            return `
+              <div class="col-md-6 col-lg-4">
+                <div class="hb-card">
+                  <div class="img-container">
+                    <img src="${f.imageUrl}" alt="${f.name}" class="hb-card-img-top" onerror="handleImageError(this)">
+                    <div class="badge-overlay-rating">★ ${f.rating}</div>
+                  </div>
+                  <div class="p-3 d-flex flex-column flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                      <h5 class="fw-bold text-dark mb-0 text-truncate">${f.name}</h5>
+                      <button class="btn btn-link text-danger p-0" onclick="removeFav(${fav.id})">❌</button>
+                    </div>
+                    <div class="price-inr mb-2">${formatINR(f.price)}</div>
+                    <a href="/food-details.html?id=${f.id}" class="btn btn-hb-primary btn-sm w-100 mt-auto fw-bold">Order Now &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+          return '';
+        }).join('');
+      } catch (e) {
+        document.getElementById('favoritesGrid').innerHTML = `<div class="col-12 alert alert-danger">${e.message}</div>`;
+      }
+    }
+
+    async function removeFav(id) {
+      try {
+        await apiRequest(`/favorites/${id}`, { method: 'DELETE' });
+        showToast('Removed from favorites', 'info');
+        loadFavorites();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadFavorites);
+  </script>
+</body>
+</html>

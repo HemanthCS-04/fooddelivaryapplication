@@ -1,0 +1,21 @@
+node_modules/
+build/
+dist/
+coverage/
+target/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Eclipse & IDE metadata
+.project
+.classpath
+.settings/
+*.launch
+.idea/
+*.iml
+
+# Platform and lock files
+metadata.json
+bun.lock

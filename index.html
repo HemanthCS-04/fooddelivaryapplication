@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HungerByte - Delicious Food, Delivered Fast</title>
+  <meta name="description" content="HungerByte is a full-stack food delivery web application built with Spring Boot, Hibernate JPA, MySQL, and JavaScript using Fetch API.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-hb sticky-top">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-logo" href="/index.html">
+        <img src="/favicon.svg" alt="HungerByte Logo" width="34" height="34" class="me-2" style="border-radius: 8px; vertical-align: middle;">
+        <span>Hunger<span class="brand-accent">Byte</span></span>
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#hbNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="hbNavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-lg-1">
+          <li class="nav-item">
+            <a class="nav-link active" href="/index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/restaurants.html">Restaurants</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/orders.html">Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/favorites.html">Favorites</a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <a href="/cart.html" class="btn btn-outline-dark position-relative rounded-3 px-3 py-2">
+            🛒 Cart
+            <span class="hb-cart-count cart-badge-count" style="display:none;">0</span>
+          </a>
+
+          <div id="navbar-auth-section" class="d-flex align-items-center">
+            <!-- Dynamically populated by api.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section">
+    <div class="container position-relative">
+      <div class="row align-items-center">
+        <div class="col-lg-7">
+          <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-3 mb-3">🔥 Superfast 30 Min Delivery</span>
+          <h1 class="hero-title mb-3">Delicious food, delivered fast.</h1>
+          <p class="hero-subtitle mb-4">
+            Explore top-rated restaurants, sizzling hot biryanis, crispy pizzas, and gourmet burgers delivered directly to your doorstep in Bangalore.
+          </p>
+
+          <!-- Search Bar -->
+          <div class="hero-search-box mb-3">
+            <span class="px-3 text-muted fs-5">🔍</span>
+            <input type="text" id="homeSearchInput" class="form-control hero-search-input py-2" placeholder="Search for restaurants, dishes or cuisines...">
+            <button class="btn btn-hb-primary px-4 py-2" id="homeSearchBtn">Search</button>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 flex-wrap text-white-50 small">
+            <span>Popular:</span>
+            <a href="/restaurants.html?search=Biryani" class="badge bg-secondary text-white text-decoration-none">Biryani</a>
+            <a href="/restaurants.html?search=Pizza" class="badge bg-secondary text-white text-decoration-none">Pizza</a>
+            <a href="/restaurants.html?search=Dosa" class="badge bg-secondary text-white text-decoration-none">Masala Dosa</a>
+            <a href="/restaurants.html?search=Burger" class="badge bg-secondary text-white text-decoration-none">Burger</a>
+          </div>
+        </div>
+        <div class="col-lg-5 text-center mt-5 mt-lg-0">
+          <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop&q=80" alt="Delicious Food" class="img-fluid rounded-4 shadow-lg border border-3 border-white" style="max-height: 380px; object-fit: cover;">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Categories Section -->
+  <section class="py-5 bg-white border-bottom">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="text-uppercase text-muted fw-bold small">What's on your mind?</span>
+          <h2 class="fw-bold mb-0">Browse Categories</h2>
+        </div>
+        <a href="/restaurants.html" class="text-decoration-none fw-semibold text-hb-primary">View All Dishes &rarr;</a>
+      </div>
+
+      <div class="row row-cols-2 row-cols-md-4 row-cols-lg-8 g-3" id="categoriesContainer">
+        <!-- Rendered dynamically by JavaScript -->
+        <div class="col text-center py-4"><div class="spinner-border text-warning" role="status"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Special Offers Section -->
+  <section class="py-4 bg-light">
+    <div class="container">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="p-4 rounded-4 text-white d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, #ff5200 0%, #ff7a00 100%);">
+            <div>
+              <span class="badge bg-dark mb-1">CODE: HUNGER50</span>
+              <h5 class="fw-bold mb-1">Flat ₹50 OFF</h5>
+              <p class="small mb-0 opacity-75">On orders above ₹299</p>
+            </div>
+            <span class="fs-1">🍕</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 rounded-4 text-white d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+            <div>
+              <span class="badge bg-dark mb-1">CODE: FEAST100</span>
+              <h5 class="fw-bold mb-1">Flat ₹100 OFF</h5>
+              <p class="small mb-0 opacity-75">On orders above ₹499</p>
+            </div>
+            <span class="fs-1">🍗</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 rounded-4 text-white d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+            <div>
+              <span class="badge bg-dark mb-1">CODE: WELCOME20</span>
+              <h5 class="fw-bold mb-1">20% Discount</h5>
+              <p class="small mb-0 opacity-75">First meal order up to ₹150</p>
+            </div>
+            <span class="fs-1">🎁</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Restaurants Section -->
+  <section class="py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="text-uppercase text-muted fw-bold small">Top Picks in Bangalore</span>
+          <h2 class="fw-bold mb-0">Popular Restaurants</h2>
+        </div>
+        <a href="/restaurants.html" class="text-decoration-none fw-semibold">See All Restaurants &rarr;</a>
+      </div>
+
+      <div class="row g-4" id="popularRestaurantsContainer">
+        <!-- Rendered dynamically -->
+        <div class="col-12 text-center py-5"><div class="spinner-border text-danger" role="status"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Foods Section -->
+  <section class="py-5 bg-white border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="text-uppercase text-muted fw-bold small">Most Ordered Delicious Bites</span>
+          <h2 class="fw-bold mb-0">Popular Dishes</h2>
+        </div>
+        <a href="/restaurants.html" class="text-decoration-none fw-semibold">Explore Full Menu &rarr;</a>
+      </div>
+
+      <div class="row g-4" id="popularFoodsContainer">
+        <!-- Rendered dynamically -->
+        <div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-hb">
+    <div class="container">
+      <div class="row g-4 pb-4 border-bottom border-secondary">
+        <div class="col-lg-4">
+          <h4 class="text-white fw-bold mb-3">🍔 Hunger<span class="text-warning">Byte</span></h4>
+          <p class="small text-secondary">
+            HungerByte is a modern full-stack food delivery web application built with Spring Boot, Hibernate JPA, MySQL, and JavaScript using Fetch API.
+          </p>
+          <div class="d-flex gap-2">
+            <span class="badge bg-secondary">Spring Boot 3</span>
+            <span class="badge bg-secondary">MySQL</span>
+            <span class="badge bg-secondary">Hibernate</span>
+            <span class="badge bg-secondary">Fetch API</span>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-bold mb-3">Navigation</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/restaurants.html">Restaurants</a></li>
+            <li><a href="/cart.html">Shopping Cart</a></li>
+            <li><a href="/orders.html">Order History</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-bold mb-3">Portals</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="/login.html">User Login</a></li>
+            <li><a href="/register.html">Register Account</a></li>
+            <li><a href="/restaurant-owner-dashboard.html">Owner Dashboard</a></li>
+            <li><a href="/admin-dashboard.html">Admin Panel</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white fw-bold mb-3">Default Test Credentials</h6>
+          <div class="bg-dark p-3 rounded-3 small border border-secondary text-secondary">
+            <div><strong class="text-light">Admin:</strong> admin@hungerbyte.com / admin123</div>
+            <div><strong class="text-light">Owner:</strong> owner@hungerbyte.com / owner123</div>
+            <div><strong class="text-light">Customer:</strong> customer@hungerbyte.com / customer123</div>
+          </div>
+        </div>
+      </div>
+      <div class="pt-3 text-center small text-secondary">
+        &copy; 2026 HungerByte. Full Stack Maven Spring Boot Project for Eclipse IDE.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Global API and Helpers -->
+  <script src="/js/api.js"></script>
+  <!-- Page specific logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Fetch Categories
+      try {
+        const catRes = await apiRequest('/categories');
+        const catCont = document.getElementById('categoriesContainer');
+        if (catRes && catRes.data && catRes.data.length > 0) {
+          catCont.innerHTML = catRes.data.map(cat => `
+            <div class="col">
+              <a href="/restaurants.html?category=${cat.id}" class="cat-item-card">
+                <div class="cat-img-wrapper">
+                  <img src="${cat.imageUrl}" alt="${cat.name}" onerror="handleImageError(this)">
+                </div>
+                <div class="fw-bold small">${cat.name}</div>
+              </a>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Error fetching categories:', e);
+      }
+
+      // 2. Fetch Popular Restaurants
+      try {
+        const restRes = await apiRequest('/restaurants');
+        const restCont = document.getElementById('popularRestaurantsContainer');
+        if (restRes && restRes.data && restRes.data.length > 0) {
+          const top4 = restRes.data.slice(0, 4);
+          restCont.innerHTML = top4.map(r => `
+            <div class="col-md-6 col-lg-3">
+              <a href="/restaurant-details.html?id=${r.id}" class="text-decoration-none">
+                <div class="hb-card">
+                  <div class="img-container">
+                    <img src="${r.imageUrl}" alt="${r.name}" class="hb-card-img-top" onerror="handleImageError(this)">
+                    <div class="badge-overlay-rating">★ ${r.rating}</div>
+                  </div>
+                  <div class="p-3 d-flex flex-column flex-grow-1">
+                    <h5 class="fw-bold text-dark mb-1 text-truncate">${r.name}</h5>
+                    <p class="text-muted small mb-2 text-truncate">${r.cuisine}</p>
+                    <div class="mt-auto d-flex justify-content-between align-items-center small text-muted pt-2 border-top">
+                      <span>⏱️ ${r.deliveryTimeMins} mins</span>
+                      <span>${formatINR(r.costForTwo)} for two</span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Error fetching restaurants:', e);
+      }
+
+      // 3. Fetch Popular Foods
+      try {
+        const foodRes = await apiRequest('/foods');
+        const foodCont = document.getElementById('popularFoodsContainer');
+        if (foodRes && foodRes.data && foodRes.data.length > 0) {
+          const top4Foods = foodRes.data.slice(0, 4);
+          foodCont.innerHTML = top4Foods.map(f => `
+            <div class="col-md-6 col-lg-3">
+              <div class="hb-card">
+                <div class="img-container">
+                  <a href="/food-details.html?id=${f.id}">
+                    <img src="${f.imageUrl}" alt="${f.name}" class="hb-card-img-top" onerror="handleImageError(this)">
+                  </a>
+                  <div class="position-absolute top-0 start-0 m-2">
+                    <span class="${f.isVeg ? 'badge-veg-indicator' : 'badge-nonveg-indicator'} bg-white p-1"></span>
+                  </div>
+                </div>
+                <div class="p-3 d-flex flex-column flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <a href="/food-details.html?id=${f.id}" class="text-decoration-none text-dark">
+                      <h6 class="fw-bold mb-0 text-truncate" style="max-width: 170px;">${f.name}</h6>
+                    </a>
+                    <span class="badge bg-light text-dark border">★ ${f.rating}</span>
+                  </div>
+                  <small class="text-muted mb-2 text-truncate">${f.restaurant ? f.restaurant.name : 'HungerByte Special'}</small>
+                  <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="price-inr">${formatINR(f.price)}</span>
+                    <button class="btn btn-sm btn-hb-primary px-3 fw-bold" onclick="quickAddToCart(${f.id})">ADD +</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Error fetching foods:', e);
+      }
+
+      // Search Handler
+      const searchBtn = document.getElementById('homeSearchBtn');
+      const searchInput = document.getElementById('homeSearchInput');
+      const executeSearch = () => {
+        const query = searchInput.value.trim();
+        if (query) {
+          window.location.href = `/restaurants.html?search=${encodeURIComponent(query)}`;
+        }
+      };
+      searchBtn.addEventListener('click', executeSearch);
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') executeSearch();
+      });
+    });
+
+    async function quickAddToCart(foodId) {
+      try {
+        const userId = AuthManager.getUserId();
+        await apiRequest(`/cart/items?userId=${userId}`, {
+          method: 'POST',
+          body: JSON.stringify({ foodItemId: foodId, quantity: 1 })
+        });
+        showToast('Item added to your cart!', 'success');
+        updateNavCartBadge();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

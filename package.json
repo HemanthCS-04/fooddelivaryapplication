@@ -1,0 +1,21 @@
+{
+  "name": "hungerbyte",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js",
+    "clean": "rm -rf dist",
+    "lint": "node --check server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "vite": "^8.3.0"
+  },
+  "devDependencies": {}
+}
+
